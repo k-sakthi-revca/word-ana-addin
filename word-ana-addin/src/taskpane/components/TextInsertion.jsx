@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
-import { Button, Field, Textarea, tokens, makeStyles } from "@fluentui/react-components";
+import { Button, Field, Textarea, tokens, makeStyles, Divider } from "@fluentui/react-components";
 import PropTypes from "prop-types";
 
 const useStyles = makeStyles({
@@ -21,6 +21,10 @@ const useStyles = makeStyles({
     marginRight: "20px",
     maxWidth: "50%",
   },
+  divider: {
+    margin: "20px 0",
+    width: "100%",
+  },
 });
 
 const TextInsertion = (props) => {
@@ -37,15 +41,18 @@ const TextInsertion = (props) => {
   const styles = useStyles();
 
   return (
-    <div className={styles.textPromptAndInsertion}>
-      <Field className={styles.textAreaField} size="large" label="Enter text to be inserted into the document.">
-        <Textarea size="large" value={text} onChange={handleTextChange} />
-      </Field>
-      <Field className={styles.instructions}>Click the button to insert text.</Field>
-      <Button appearance="primary" disabled={false} size="large" onClick={handleTextInsertion}>
-        Insert text
-      </Button>
-    </div>
+    <>
+      <Divider className={styles.divider}>Or use basic text insertion</Divider>
+      <div className={styles.textPromptAndInsertion}>
+        <Field className={styles.textAreaField} size="large" label="Enter text to be inserted into the document.">
+          <Textarea size="large" value={text} onChange={handleTextChange} />
+        </Field>
+        <Field className={styles.instructions}>Click the button to insert text.</Field>
+        <Button appearance="primary" disabled={false} size="large" onClick={handleTextInsertion}>
+          Insert text
+        </Button>
+      </div>
+    </>
   );
 };
 

@@ -3,8 +3,9 @@ import PropTypes from "prop-types";
 import Header from "./Header";
 import HeroList from "./HeroList";
 import TextInsertion from "./TextInsertion";
+import AIAssistance from "./AIAssistance";
 import { makeStyles } from "@fluentui/react-components";
-import { Ribbon24Regular, LockOpen24Regular, DesignIdeas24Regular } from "@fluentui/react-icons";
+import { Ribbon24Regular, LockOpen24Regular, DesignIdeas24Regular, Sparkle24Regular } from "@fluentui/react-icons";
 import { insertText } from "../taskpane";
 
 const useStyles = makeStyles({
@@ -31,13 +32,18 @@ const App = (props) => {
       icon: <DesignIdeas24Regular />,
       primaryText: "Create and visualize like a pro",
     },
+    {
+      icon: <Sparkle24Regular />,
+      primaryText: "AI-powered content creation and enhancement",
+    },
   ];
 
   return (
     <div className={styles.root}>
-      <Header logo="assets/logo-filled.png" title={title} message="Welcome" />
-      <HeroList message="Discover what this add-in can do for you today!" items={listItems} />
-      <TextInsertion insertText={insertText} />
+      {/* <Header logo="assets/Ana_logo.png" title={title} message="Welcome" /> */}
+      {/* <HeroList message="Discover what this add-in can do for you today!" items={listItems} /> */}
+      <AIAssistance insertText={insertText} />
+      {/* <TextInsertion insertText={insertText} /> */}
     </div>
   );
 };
