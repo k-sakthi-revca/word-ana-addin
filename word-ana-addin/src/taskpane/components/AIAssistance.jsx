@@ -27,9 +27,11 @@ const useStyles = makeStyles({
     padding: "20px",
     background: "linear-gradient(135deg, #ef4444 0%, #FF6B33 100%)",
     color: "white",
+    position: "relative", // Added for positioning the logout button
   },
   headerContent: {
     marginLeft: "15px",
+    flex: 1, // Added to take available space
   },
   headerTitle: {
     fontSize: "24px",
@@ -38,6 +40,24 @@ const useStyles = makeStyles({
   },
   headerSubtitle: {
     opacity: 0.9,
+  },
+  logoutButton: {
+    position: "absolute",
+    top: "15px",
+    right: "15px",
+    background: "rgba(255, 255, 255, 0.2)",
+    color: "white",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    borderRadius: "4px",
+    padding: "6px 12px",
+    fontSize: "12px",
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    ":hover": {
+      background: "rgba(255, 255, 255, 0.3)",
+      borderColor: "rgba(255, 255, 255, 0.5)",
+    },
   },
   mainContent: {
     padding: "20px",
@@ -320,6 +340,14 @@ const AIAssistance = (props) => {
         return "";
     }
   };
+   const handleLogout = () => {
+    // Clear authentication data
+    localStorage.removeItem("anaUserAuthenticated");
+    localStorage.removeItem("anaUserEmail");
+    
+    // Reload the page to reset the application state
+    window.location.reload();
+  };
 
   // Function to render content preview
   const renderContentPreview = () => {
@@ -369,6 +397,14 @@ const AIAssistance = (props) => {
           <h1 className={styles.headerTitle}>Ana Writing Assistant</h1>
           <p className={styles.headerSubtitle}>Enhance your document with Ana</p>
         </div>
+         {/* Logout Button */}
+        <button 
+          className={styles.logoutButton}
+          onClick={handleLogout}
+          title="Logout"
+        >
+          Logout
+        </button>
       </div>
       
       <div className={styles.mainContent}>
