@@ -117,6 +117,30 @@ const useStyles = makeStyles({
     maxHeight: "200px",
     overflowY: "auto",
   },
+  documentPreview: {
+    marginTop: "20px",
+    padding: "15px",
+    background: "#f9fafb",
+    borderRadius: "6px",
+    border: "1px solid #e5e7eb",
+  },
+  previewTitle: {
+    marginBottom: "10px",
+    color: "#ef4444",
+    fontSize: "16px",
+  },
+  previewContent: {
+    background: "white",
+    padding: "15px",
+    borderRadius: "4px",
+    border: "1px solid #e5e7eb",
+    minHeight: "100px",
+    maxHeight: "200px",
+    overflowY: "auto",
+    fontFamily: "'Times New Roman', serif",
+    fontSize: "12pt",
+    lineHeight: "1.5",
+  },
   buttonGroup: {
     marginTop: "10px",
     display: "flex",
@@ -136,6 +160,30 @@ const useStyles = makeStyles({
     justifyContent: "center",
     padding: "20px",
   },
+  previewHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "10px",
+  },
+  previewTabs: {
+    display: "flex",
+    gap: "10px",
+  },
+  previewTab: {
+    padding: "5px 10px",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "12px",
+  },
+  activeTab: {
+    background: "#ef4444",
+    color: "white",
+  },
+  inactiveTab: {
+    background: "#e5e7eb",
+    color: "#6b7280",
+  },
 });
 
 const AIAssistance = (props) => {
@@ -152,6 +200,7 @@ const AIAssistance = (props) => {
   const [enhancedContent, setEnhancedContent] = useState("");
   const [summaryContent, setSummaryContent] = useState("");
   const [recommendations, setRecommendations] = useState([]);
+  const [previewMode, setPreviewMode] = useState("preview"); // preview or code
 
   const styles = useStyles();
 
@@ -258,10 +307,64 @@ const AIAssistance = (props) => {
     setEnhancedContent(textToEnhance);
   };
 
+  // Function to get current content based on active feature
+  const getCurrentContent = () => {
+    switch (activeFeature) {
+      case "generate":
+        return generatedContent;
+      case "enhance":
+        return enhancedContent;
+      case "summarize":
+        return summaryContent;
+      default:
+        return "";
+    }
+  };
+
+  // Function to render content preview
+  const renderContentPreview = () => {
+    const content = getCurrentContent();
+    if (!content) return null;
+
+    return (
+      <div className={styles.documentPreview}>
+        <div className={styles.previewHeader}>
+          <h4 className={styles.previewTitle}>Document Preview</h4>
+          <div className={styles.previewTabs}>
+            <div 
+              className={`${styles.previewTab} ${previewMode === "preview" ? styles.activeTab : styles.inactiveTab}`}
+              onClick={() => setPreviewMode("preview")}
+            >
+              Preview
+            </div>
+            <div 
+              className={`${styles.previewTab} ${previewMode === "code" ? styles.activeTab : styles.inactiveTab}`}
+              onClick={() => setPreviewMode("code")}
+            >
+              Code
+            </div>
+          </div>
+        </div>
+        
+        {previewMode === "preview" ? (
+          <div className={styles.previewContent}>
+            {content}
+          </div>
+        ) : (
+          <div className={styles.previewContent} style={{ fontFamily: 'monospace', fontSize: '11pt' }}>
+            {content.split('\n').map((line, i) => (
+              <div key={i}>{line}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <img src="assets/Ana_logo.png" alt="Contoso Logo" width="60" height="60" />
+        <img src="assets/Ana_logo.png" alt="Ana Logo" width="60" height="60" />
         <div className={styles.headerContent}>
           <h1 className={styles.headerTitle}>Ana Writing Assistant</h1>
           <p className={styles.headerSubtitle}>Enhance your document with Ana</p>
@@ -456,10 +559,13 @@ const AIAssistance = (props) => {
           )}
         </div>
       </div>
+
+      {/* Document Preview Section */}
+      {/* {getCurrentContent() && renderContentPreview()} */}
       
       {isLoading && (
         <div className={styles.loadingContainer}>
-          <Spinner label="AI is working its magic..." labelPosition="below" />
+          <Spinner label="Ana is working its magic..." labelPosition="below" />
         </div>
       )}
       

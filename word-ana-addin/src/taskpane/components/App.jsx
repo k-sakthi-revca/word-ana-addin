@@ -1,11 +1,18 @@
 import * as React from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import Header from "./Header";
 import HeroList from "./HeroList";
 import TextInsertion from "./TextInsertion";
 import AIAssistance from "./AIAssistance";
+import Login from "./Login";
 import { makeStyles } from "@fluentui/react-components";
-import { Ribbon24Regular, LockOpen24Regular, DesignIdeas24Regular, Sparkle24Regular } from "@fluentui/react-icons";
+import { 
+  Ribbon24Regular, 
+  LockOpen24Regular, 
+  DesignIdeas24Regular, 
+  Sparkle24Regular 
+} from "@fluentui/react-icons";
 import { insertText } from "../taskpane";
 
 const useStyles = makeStyles({
@@ -17,8 +24,18 @@ const useStyles = makeStyles({
 const App = (props) => {
   const { title } = props;
   const styles = useStyles();
-  // The list items are static and won't change at runtime,
-  // so this should be an ordinary const, not a part of state.
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(false);
+
+  // Check if user is already authenticated on component mount
+  useEffect(() => {
+    const authenticated = localStorage.getItem("anaUserAuthenticated");
+    if (authenticated === "true") {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
   const listItems = [
     {
       icon: <Ribbon24Regular />,
@@ -38,6 +55,12 @@ const App = (props) => {
     },
   ];
 
+  // Show login/signup if not authenticated
+  if (!isAuthenticated) {
+    return <Login setIsAuthenticated={setIsAuthenticated} setIsSignUp={setIsSignUp} />;
+  }
+
+  // Show main app if authenticated
   return (
     <div className={styles.root}>
       {/* <Header logo="assets/Ana_logo.png" title={title} message="Welcome" /> */}
