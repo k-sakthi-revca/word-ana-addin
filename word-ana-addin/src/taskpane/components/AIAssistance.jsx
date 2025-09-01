@@ -19,7 +19,9 @@ const useStyles = makeStyles({
     margin: "0 auto",
     background: "white",
     boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-    overflow: "hidden",
+    overflow: "visible", // Changed from hidden to visible
+    position: "relative",
+    zIndex: 1,
   },
   header: {
     display: "flex",
@@ -27,11 +29,11 @@ const useStyles = makeStyles({
     padding: "20px",
     background: "linear-gradient(135deg, #ef4444 0%, #FF6B33 100%)",
     color: "white",
-    position: "relative", // Added for positioning the logout button
+    position: "relative",
   },
   headerContent: {
     marginLeft: "15px",
-    flex: 1, // Added to take available space
+    flex: 1,
   },
   headerTitle: {
     fontSize: "24px",
@@ -67,6 +69,8 @@ const useStyles = makeStyles({
     "@media (max-width: 768px)": {
       gridTemplateColumns: "1fr",
     },
+    position: "relative",
+    zIndex: 2, // Ensure content is above other elements
   },
   aiFeature: {
     background: "#f9fafb",
@@ -74,6 +78,8 @@ const useStyles = makeStyles({
     padding: "20px",
     boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
     transition: "transform 0.2s, box-shadow 0.2s",
+    position: "relative",
+    zIndex: 3, // Higher z-index for dropdown containers
     ":hover": {
       transform: "translateY(-2px)",
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -108,14 +114,24 @@ const useStyles = makeStyles({
       boxShadow: "0 0 0 3px rgba(79, 70, 229, 0.2)",
     },
   },
+  selectContainer: {
+    position: "relative",
+    marginBottom: "15px",
+    zIndex: 1000, // High z-index for dropdowns
+  },
   selectField: {
     width: "100%",
     padding: "10px",
     border: "1px solid #e5e7eb",
     borderRadius: "6px",
-    marginBottom: "15px",
     fontSize: "14px",
     backgroundColor: "white",
+    position: "relative",
+    zIndex: 1001,
+  },
+  dropdownPopup: {
+    zIndex: 9999, // Very high z-index for dropdown popup
+    position: "absolute",
   },
   outputSection: {
     marginTop: "20px",
@@ -123,6 +139,8 @@ const useStyles = makeStyles({
     background: "#f9fafb",
     borderRadius: "6px",
     borderLeft: "4px solid #ef4444",
+    position: "relative",
+    zIndex: 1,
   },
   outputTitle: {
     marginBottom: "10px",
@@ -137,30 +155,6 @@ const useStyles = makeStyles({
     maxHeight: "200px",
     overflowY: "auto",
   },
-  documentPreview: {
-    marginTop: "20px",
-    padding: "15px",
-    background: "#f9fafb",
-    borderRadius: "6px",
-    border: "1px solid #e5e7eb",
-  },
-  previewTitle: {
-    marginBottom: "10px",
-    color: "#ef4444",
-    fontSize: "16px",
-  },
-  previewContent: {
-    background: "white",
-    padding: "15px",
-    borderRadius: "4px",
-    border: "1px solid #e5e7eb",
-    minHeight: "100px",
-    maxHeight: "200px",
-    overflowY: "auto",
-    fontFamily: "'Times New Roman', serif",
-    fontSize: "12pt",
-    lineHeight: "1.5",
-  },
   buttonGroup: {
     marginTop: "10px",
     display: "flex",
@@ -173,38 +167,36 @@ const useStyles = makeStyles({
     color: "#6b7280",
     fontSize: "14px",
     borderTop: "1px solid #e5e7eb",
+    position: "relative",
+    zIndex: 1,
   },
   loadingContainer: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     padding: "20px",
-  },
-  previewHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "10px",
-  },
-  previewTabs: {
-    display: "flex",
-    gap: "10px",
-  },
-  previewTab: {
-    padding: "5px 10px",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontSize: "12px",
-  },
-  activeTab: {
-    background: "#ef4444",
-    color: "white",
-  },
-  inactiveTab: {
-    background: "#e5e7eb",
-    color: "#6b7280",
+    position: "relative",
+    zIndex: 1,
   },
 });
+
+// Custom Select Wrapper Component to fix dropdown issues
+const CustomSelect = ({ className, value, onChange, children, ...props }) => {
+  const styles = useStyles();
+  
+  return (
+    <div className={styles.selectContainer}>
+      <Select
+        className={`${styles.selectField} ${className}`}
+        value={value}
+        onChange={onChange}
+        {...props}
+      >
+        {children}
+      </Select>
+    </div>
+  );
+};
 
 const AIAssistance = (props) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -214,15 +206,23 @@ const AIAssistance = (props) => {
   const [textToSummarize, setTextToSummarize] = useState("");
   const [contentType, setContentType] = useState("");
   const [tone, setTone] = useState("");
-  const [enhancementType, setEnhancementType] = useState("improve");
+  const [length, setLength] = useState("");
+  const [enhancementType, setEnhancementType] = useState("");
+  const [enhancementLevel, setEnhancementLevel] = useState("");
+  const [targetAudience, setTargetAudience] = useState("");
   const [summaryLength, setSummaryLength] = useState("medium");
   const [generatedContent, setGeneratedContent] = useState("");
   const [enhancedContent, setEnhancedContent] = useState("");
   const [summaryContent, setSummaryContent] = useState("");
   const [recommendations, setRecommendations] = useState([]);
-  const [previewMode, setPreviewMode] = useState("preview"); // preview or code
 
   const styles = useStyles();
+
+  const handleLogout = () => {
+    localStorage.removeItem("anaUserAuthenticated");
+    localStorage.removeItem("anaUserEmail");
+    window.location.reload();
+  };
 
   const simulateAPICall = () => {
     return new Promise(resolve => {
@@ -240,7 +240,6 @@ const AIAssistance = (props) => {
     
     await simulateAPICall();
     
-    // Mock generated content
     const content = "Artificial intelligence is transforming how we create and interact with content. These advanced systems can now generate human-like text, provide insightful recommendations, and enhance existing content with unprecedented accuracy. By leveraging large language models, AI writing assistants help users overcome creative blocks, improve communication effectiveness, and save valuable time in the content creation process.";
     
     setGeneratedContent(content);
@@ -255,7 +254,6 @@ const AIAssistance = (props) => {
     
     await simulateAPICall();
     
-    // Mock enhancement
     let enhancedText = textToEnhance;
     if (enhancementType === "improve") {
       enhancedText = textToEnhance + " This enhanced version demonstrates clearer communication and more effective presentation of ideas, ensuring your message resonates with your intended audience.";
@@ -275,7 +273,6 @@ const AIAssistance = (props) => {
     
     await simulateAPICall();
     
-    // Mock summary
     const summary = "This text discusses the importance of AI writing assistants in modern content creation. It highlights how these tools can generate human-like text, provide recommendations, and enhance existing content, ultimately saving time and improving communication effectiveness.";
     
     setSummaryContent(summary);
@@ -288,7 +285,6 @@ const AIAssistance = (props) => {
     
     await simulateAPICall();
     
-    // Mock recommendations
     const mockRecommendations = [
       "Consider adding more transition words to improve flow",
       "The document could benefit from more specific examples",
@@ -327,68 +323,6 @@ const AIAssistance = (props) => {
     setEnhancedContent(textToEnhance);
   };
 
-  // Function to get current content based on active feature
-  const getCurrentContent = () => {
-    switch (activeFeature) {
-      case "generate":
-        return generatedContent;
-      case "enhance":
-        return enhancedContent;
-      case "summarize":
-        return summaryContent;
-      default:
-        return "";
-    }
-  };
-   const handleLogout = () => {
-    // Clear authentication data
-    localStorage.removeItem("anaUserAuthenticated");
-    localStorage.removeItem("anaUserEmail");
-    
-    // Reload the page to reset the application state
-    window.location.reload();
-  };
-
-  // Function to render content preview
-  const renderContentPreview = () => {
-    const content = getCurrentContent();
-    if (!content) return null;
-
-    return (
-      <div className={styles.documentPreview}>
-        <div className={styles.previewHeader}>
-          <h4 className={styles.previewTitle}>Document Preview</h4>
-          <div className={styles.previewTabs}>
-            <div 
-              className={`${styles.previewTab} ${previewMode === "preview" ? styles.activeTab : styles.inactiveTab}`}
-              onClick={() => setPreviewMode("preview")}
-            >
-              Preview
-            </div>
-            <div 
-              className={`${styles.previewTab} ${previewMode === "code" ? styles.activeTab : styles.inactiveTab}`}
-              onClick={() => setPreviewMode("code")}
-            >
-              Code
-            </div>
-          </div>
-        </div>
-        
-        {previewMode === "preview" ? (
-          <div className={styles.previewContent}>
-            {content}
-          </div>
-        ) : (
-          <div className={styles.previewContent} style={{ fontFamily: 'monospace', fontSize: '11pt' }}>
-            {content.split('\n').map((line, i) => (
-              <div key={i}>{line}</div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -397,7 +331,7 @@ const AIAssistance = (props) => {
           <h1 className={styles.headerTitle}>Ana Writing Assistant</h1>
           <p className={styles.headerSubtitle}>Enhance your document with Ana</p>
         </div>
-         {/* Logout Button */}
+        
         <button 
           className={styles.logoutButton}
           onClick={handleLogout}
@@ -408,6 +342,7 @@ const AIAssistance = (props) => {
       </div>
       
       <div className={styles.mainContent}>
+        {/* Generate Content Section */}
         <div className={styles.aiFeature}>
           <h3 className={styles.featureTitle}>
             <span className={styles.featureIcon}>✨</span>
@@ -423,28 +358,52 @@ const AIAssistance = (props) => {
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Enter topic or prompt..."
           />
-          <Select
-            className={styles.selectField}
+          
+          <CustomSelect
             value={contentType}
-            onChange={(e) => setContentType(e.target.value)}
+            onChange={(e, data) => setContentType(data.value)}
           >
             <Option value="">Select content type</Option>
             <Option value="paragraph">Paragraph</Option>
             <Option value="email">Email</Option>
             <Option value="report">Report Section</Option>
             <Option value="blog">Blog Post</Option>
-          </Select>
-          <Select
-            className={styles.selectField}
+            <Option value="essay">Essay</Option>
+            <Option value="summary">Executive Summary</Option>
+            <Option value="outline">Content Outline</Option>
+            <Option value="social">Social Media Post</Option>
+            <Option value="newsletter">Newsletter</Option>
+            <Option value="press">Press Release</Option>
+          </CustomSelect>
+          
+          <CustomSelect
             value={tone}
-            onChange={(e) => setTone(e.target.value)}
+            onChange={(e, data) => setTone(data.value)}
           >
             <Option value="">Select tone</Option>
             <Option value="professional">Professional</Option>
             <Option value="casual">Casual</Option>
             <Option value="academic">Academic</Option>
             <Option value="creative">Creative</Option>
-          </Select>
+            <Option value="formal">Formal</Option>
+            <Option value="friendly">Friendly</Option>
+            <Option value="persuasive">Persuasive</Option>
+            <Option value="informative">Informative</Option>
+            <Option value="technical">Technical</Option>
+            <Option value="humorous">Humorous</Option>
+          </CustomSelect>
+          
+          <CustomSelect
+            value={length}
+            onChange={(e, data) => setLength(data.value)}
+          >
+            <Option value="">Select length</Option>
+            <Option value="short">Short (1-2 paragraphs)</Option>
+            <Option value="medium">Medium (3-5 paragraphs)</Option>
+            <Option value="long">Long (6+ paragraphs)</Option>
+            <Option value="bullet">Bullet Points</Option>
+          </CustomSelect>
+          
           <Button 
             appearance="primary" 
             onClick={handleGenerateContent}
@@ -469,6 +428,7 @@ const AIAssistance = (props) => {
           )}
         </div>
         
+        {/* Enhance Content Section */}
         <div className={styles.aiFeature}>
           <h3 className={styles.featureTitle}>
             <span className={styles.featureIcon}>🪄</span>
@@ -483,17 +443,49 @@ const AIAssistance = (props) => {
             onChange={(e) => setTextToEnhance(e.target.value)}
             placeholder="Paste text to enhance..."
           />
-          <Select
-            className={styles.selectField}
+          
+          <CustomSelect
             value={enhancementType}
-            onChange={(e) => setEnhancementType(e.target.value)}
+            onChange={(e, data) => setEnhancementType(data.value)}
           >
-            <Option value="improve">Improve Writing</Option>
+            <Option value="">Select enhancement type</Option>
+            <Option value="improve">Improve Writing Quality</Option>
             <Option value="expand">Expand Content</Option>
             <Option value="shorten">Make More Concise</Option>
             <Option value="formal">Make More Formal</Option>
             <Option value="simple">Simplify Language</Option>
-          </Select>
+            <Option value="engaging">Make More Engaging</Option>
+            <Option value="professional">Make More Professional</Option>
+            <Option value="persuasive">Make More Persuasive</Option>
+            <Option value="structured">Improve Structure</Option>
+            <Option value="grammar">Fix Grammar & Spelling</Option>
+            <Option value="vocabulary">Enhance Vocabulary</Option>
+          </CustomSelect>
+          
+          <CustomSelect
+            value={enhancementLevel}
+            onChange={(e, data) => setEnhancementLevel(data.value)}
+          >
+            <Option value="">Select enhancement level</Option>
+            <Option value="light">Light Enhancement</Option>
+            <Option value="moderate">Moderate Enhancement</Option>
+            <Option value="heavy">Heavy Enhancement</Option>
+            <Option value="creative">Creative Rewrite</Option>
+          </CustomSelect>
+          
+          <CustomSelect
+            value={targetAudience}
+            onChange={(e, data) => setTargetAudience(data.value)}
+          >
+            <Option value="">Select target audience</Option>
+            <Option value="general">General Audience</Option>
+            <Option value="technical">Technical Audience</Option>
+            <Option value="academic">Academic Audience</Option>
+            <Option value="business">Business Professionals</Option>
+            <Option value="students">Students</Option>
+            <Option value="executives">Executives</Option>
+          </CustomSelect>
+          
           <Button 
             appearance="primary" 
             onClick={handleEnhanceContent}
@@ -517,103 +509,103 @@ const AIAssistance = (props) => {
             </div>
           )}
         </div>
-        
-        <div className={styles.aiFeature}>
-          <h3 className={styles.featureTitle}>
-            <span className={styles.featureIcon}>📝</span>
-            Summarize Content
-          </h3>
-          <p className={styles.featureDescription}>
-            Create a concise summary of your selected text.
-          </p>
-          <Textarea
-            className={styles.inputField}
-            value={textToSummarize}
-            onChange={(e) => setTextToSummarize(e.target.value)}
-            placeholder="Paste text to summarize..."
-          />
-          <Select
-            className={styles.selectField}
-            value={summaryLength}
-            onChange={(e) => setSummaryLength(e.target.value)}
-          >
-            <Option value="short">Short Summary (1-2 sentences)</Option>
-            <Option value="medium">Medium Summary (paragraph)</Option>
-            <Option value="bullet">Bullet Points</Option>
-          </Select>
-          <Button 
-            appearance="primary" 
-            onClick={handleSummarizeContent}
-            disabled={isLoading || !textToSummarize}
-          >
-            Summarize
-          </Button>
 
-          {summaryContent && activeFeature === "summarize" && (
-            <div className={styles.outputSection}>
-              <h4 className={styles.outputTitle}>Summary</h4>
-              <div className={styles.outputContent}>{summaryContent}</div>
-              <div className={styles.buttonGroup}>
-                <Button appearance="primary" onClick={insertSummary}>
-                  Insert Summary
-                </Button>
-              </div>
+                <div className={styles.aiFeature}>
+                    <h3 className={styles.featureTitle}>
+                        <span className={styles.featureIcon}>📝</span>
+                        Summarize Content
+                    </h3>
+                    <p className={styles.featureDescription}>
+                        Create a concise summary of your selected text.
+                    </p>
+                    <Textarea
+                        className={styles.inputField}
+                        value={textToSummarize}
+                        onChange={(e) => setTextToSummarize(e.target.value)}
+                        placeholder="Paste text to summarize..."
+                    />
+                    <Select
+                        className={styles.selectField}
+                        value={summaryLength}
+                        onChange={(e) => setSummaryLength(e.target.value)}
+                    >
+                        <Option value="short">Short Summary (1-2 sentences)</Option>
+                        <Option value="medium">Medium Summary (paragraph)</Option>
+                        <Option value="bullet">Bullet Points</Option>
+                    </Select>
+                    <Button
+                        appearance="primary"
+                        onClick={handleSummarizeContent}
+                        disabled={isLoading || !textToSummarize}
+                    >
+                        Summarize
+                    </Button>
+
+                    {summaryContent && activeFeature === "summarize" && (
+                        <div className={styles.outputSection}>
+                            <h4 className={styles.outputTitle}>Summary</h4>
+                            <div className={styles.outputContent}>{summaryContent}</div>
+                            <div className={styles.buttonGroup}>
+                                <Button appearance="primary" onClick={insertSummary}>
+                                    Insert Summary
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className={styles.aiFeature}>
+                    <h3 className={styles.featureTitle}>
+                        <span className={styles.featureIcon}>🔍</span>
+                        Smart Recommendations
+                    </h3>
+                    <p className={styles.featureDescription}>
+                        Get suggestions to improve your document based on AI analysis.
+                    </p>
+                    <div style={{ textAlign: "center", padding: "30px 0" }}>
+                        <p>Analyze your document to get personalized recommendations for improvements.</p>
+                        <Button
+                            appearance="primary"
+                            onClick={handleAnalyzeDocument}
+                            disabled={isLoading}
+                        >
+                            Analyze Document
+                        </Button>
+                    </div>
+
+                    {recommendations.length > 0 && activeFeature === "analyze" && (
+                        <div className={styles.outputSection}>
+                            <h4 className={styles.outputTitle}>Recommendations</h4>
+                            <div className={styles.outputContent}>
+                                <ul>
+                                    {recommendations.map((rec, index) => (
+                                        <li key={index}>{rec}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-          )}
-        </div>
-        
-        <div className={styles.aiFeature}>
-          <h3 className={styles.featureTitle}>
-            <span className={styles.featureIcon}>🔍</span>
-            Smart Recommendations
-          </h3>
-          <p className={styles.featureDescription}>
-            Get suggestions to improve your document based on AI analysis.
-          </p>
-          <div style={{ textAlign: "center", padding: "30px 0" }}>
-            <p>Analyze your document to get personalized recommendations for improvements.</p>
-            <Button 
-              appearance="primary" 
-              onClick={handleAnalyzeDocument}
-              disabled={isLoading}
-            >
-              Analyze Document
-            </Button>
-          </div>
 
-          {recommendations.length > 0 && activeFeature === "analyze" && (
-            <div className={styles.outputSection}>
-              <h4 className={styles.outputTitle}>Recommendations</h4>
-              <div className={styles.outputContent}>
-                <ul>
-                  {recommendations.map((rec, index) => (
-                    <li key={index}>{rec}</li>
-                  ))}
-                </ul>
-              </div>
+            {/* Document Preview Section */}
+            {/* {getCurrentContent() && renderContentPreview()} */}
+
+            {isLoading && (
+                <div className={styles.loadingContainer}>
+                    <Spinner label="Ana is working its magic..." labelPosition="below" />
+                </div>
+            )}
+
+            <div className={styles.footer}>
+                <p>Powered by Ana AI</p>
             </div>
-          )}
         </div>
-      </div>
-
-      {/* Document Preview Section */}
-      {/* {getCurrentContent() && renderContentPreview()} */}
-      
-      {isLoading && (
-        <div className={styles.loadingContainer}>
-          <Spinner label="Ana is working its magic..." labelPosition="below" />
-        </div>
-      )}
-      
-      <div className={styles.footer}>
-        <p>Powered by Ana AI</p>
-      </div>
-    </div>
-  );
+    );
 };
 
 AIAssistance.propTypes = {
-  insertText: PropTypes.func.isRequired,
+    insertText: PropTypes.func.isRequired,
 };
 
 export default AIAssistance;
