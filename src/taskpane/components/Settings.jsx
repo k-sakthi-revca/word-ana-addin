@@ -227,9 +227,9 @@ const Settings = () => {
       // Redirect to login page (in a real app, you might use a router)
       // For now, we'll just reload the page which should redirect to login
       // based on the App component logic
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      // setTimeout(() => {
+      //   window.location.reload();
+      // }, 1000);
     } catch (error) {
       console.error("Logout error:", error);
       showNotification("Failed to logout. Please try again.", "error");
