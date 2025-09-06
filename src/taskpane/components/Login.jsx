@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
+import AuthService from "../services/authService";
+import authStateManager from "../utils/authStateManager";
 import { 
   Button, 
   Input,
@@ -58,7 +60,10 @@ const useStyles = makeStyles({
     },
     ":focus": {
       outline: "none",
-      borderColor: tokens.colorBrandBackground,
+      borderTopColor: tokens.colorBrandBackground,
+      borderRightColor: tokens.colorBrandBackground,
+      borderBottomColor: tokens.colorBrandBackground,
+      borderLeftColor: tokens.colorBrandBackground,
       boxShadow: `0 0 0 3px ${tokens.colorBrandBackgroundAlpha30}`,
     },
   },
@@ -136,36 +141,54 @@ const Login = ({ setIsAuthenticated, setIsSignUp }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     
+    // Clear any previous errors
+    setError("");
+    
+    // Validate email format
     if (!validateEmail(email)) {
       setError("Invalid email address");
       return;
     }
     
+    // Validate password length
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
     }
     
-    setError("");
+    // Set loading state
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      // For demo purposes, we'll just set authenticated to true
-      // In a real app, you would verify credentials with your backend
-      setIsAuthenticated(true);
-      setIsLoading(false);
+    try {
+      // Call the AuthService login method
+      const result = await AuthService.login(email, password);
       
-      // Store authentication state
-      localStorage.setItem("anaUserAuthenticated", "true");
-      localStorage.setItem("anaUserEmail", email);
-    }, 1500);
+      if (result.success) {
+        console.log("Login successful");
+        setIsAuthenticated(true);
+        // Broadcast authentication state to all tabs
+        authStateManager.broadcastAuthState(true);
+      } else {
+        setError("Login failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError(error.message || "Login failed. Please try again.");
+      
+      // If there's a network error, provide a more user-friendly message
+      if (error.message.includes("Network Error")) {
+        setError("Unable to connect to the server. Please check your internet connection and try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignIn = (e) => {
     e.preventDefault();
     // Google sign-in implementation would go here
-    alert("Google sign-in would be implemented here");
+    console.log("Google sign-in would be implemented here");
+    // Note: alert() is not supported in Office Add-ins
   };
 
   return (
