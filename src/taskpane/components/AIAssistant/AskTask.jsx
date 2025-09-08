@@ -80,6 +80,7 @@ const AskTask = ({
       setIsProcessing(true);
       
       // Get content based on selected context option
+      let content = "";
       await Word.run(async (context) => {
         let contentRange;
         
@@ -97,14 +98,17 @@ const AskTask = ({
         contentRange.load("text");
         await context.sync();
         
-        setDocumentContent(contentRange.text);
+        content = contentRange.text;
+        setDocumentContent(content);
       });
       
       setIsProcessing(false);
+      return content; // Return the content directly
     } catch (error) {
       console.error("Error getting document content:", error);
       setError("Failed to get document content. Please try again.");
       setIsProcessing(false);
+      return ""; // Return empty string in case of error
     }
   };
 
@@ -119,8 +123,13 @@ const AskTask = ({
     setIsProcessing(true);
     
     try {
-      // Get document content first
-      await getDocumentContent();
+      // Get document content first - use the returned content directly
+      const content = await getDocumentContent();
+      
+      // Validate that we have content
+      if (!content || content.trim() === '') {
+        console.warn("Document content is empty for context option:", contextOption);
+      }
       
       // Get user data
       const userData = AuthService.getCurrentUser();
@@ -139,12 +148,12 @@ const AskTask = ({
       // Set streaming state to true
       setIsStreaming(true);
       
-      // Use the ChatService to stream the chat
+      // Use the ChatService to stream the chat with the directly obtained content
       fullResponse = await ChatService.streamChat(
         userId,
         prompt,
         chatHistory,
-        documentContent,
+        content, // Use the directly returned content instead of state
         (responseChunk) => {
           // Append each chunk to the existing response
           setAiResponse(prevResponse => prevResponse + responseChunk);
