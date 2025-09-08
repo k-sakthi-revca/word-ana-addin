@@ -101,12 +101,11 @@ const AIAssistance = ({ initialTask }) => {
       // Handle different tasks
       switch (task) {
         case "Ask":
-          // Generic AI response
+          // For Ask, we now handle this in the AskTask component
+          // This is just a fallback in case the component's direct handler isn't used
           await new Promise(resolve => setTimeout(resolve, 1500));
           setOutput(
-            "This sheet models cash flows for a potential investment under base, management and downside cases. " +
-            "Inputs include operating assumptions, purchase multiples, transaction and financing fees, and debt assumptions. " +
-            "The model calculates key metrics such as IRR, MOIC, and total value to paid-in ratio."
+            "Please use the Ask Question button to interact with the AI assistant."
           );
           break;
           

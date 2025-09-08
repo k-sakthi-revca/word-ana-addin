@@ -5,7 +5,7 @@ import authStateManager from '../utils/authStateManager';
 // Use environment variables with fallback values
 const MONITOR_API_ENDPOINT = 'https://monitor.openana.ai';
 const MIDDLEWARE_API_ENDPOINT = 'https://middleware.openana.ai';
-const LOCAL_PROXY_ENDPOINT = 'https://localhost:5173';
+const LOCAL_PROXY_ENDPOINT = 'https://localhost:3000';
 
 // Create axios instance for the monitor API
 const monitorApi = axios.create({

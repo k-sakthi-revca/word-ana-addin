@@ -51,6 +51,7 @@ class TokenManager {
    * @param {Object} data - User data
    */
   setUserData(data) {
+    localStorage.setItem('user', JSON.stringify(data))
     this.userData = data;
   }
 
@@ -59,7 +60,9 @@ class TokenManager {
    * @returns {Object|null} - User data or null
    */
   getUserData() {
-    return this.userData;
+    const user = JSON.parse(localStorage.getItem("user"));
+    return user;
+    // return this.userData;
   }
 
   /**
@@ -67,6 +70,7 @@ class TokenManager {
    */
   clearAll() {
     localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
     this.tokens = {
       accessToken: null,
       refreshToken: null,

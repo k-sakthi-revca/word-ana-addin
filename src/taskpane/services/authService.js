@@ -5,7 +5,7 @@ import { encryptData, decryptData } from '../utils/crypto';
 import axios from 'axios';
 
 // API endpoints
-const PROXY_API_ENDPOINT = 'https://localhost:5173';
+const PROXY_API_ENDPOINT = 'https://localhost:3000';
 // For local development, the API paths might be different
 const LOGIN_API_BASE_URL = `${PROXY_API_ENDPOINT}/api`;
 
