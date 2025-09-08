@@ -16,6 +16,7 @@ class TokenManager {
    * @param {string} token - The access token
    */
   setAccessToken(token) {
+    localStorage.setItem('access_token', token)
     this.tokens.accessToken = token;
   }
 
@@ -24,7 +25,9 @@ class TokenManager {
    * @returns {string|null} - The access token or null
    */
   getAccessToken() {
-    return this.tokens.accessToken;
+    const token = localStorage.getItem("access_token")
+    return token;
+    // return this.tokens.accessToken;
   }
 
   /**
@@ -63,6 +66,7 @@ class TokenManager {
    * Clear all tokens and user data
    */
   clearAll() {
+    localStorage.removeItem("access_token");
     this.tokens = {
       accessToken: null,
       refreshToken: null,
